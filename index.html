@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Todo App</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="todo-container">
+    <h1>My Todo List</h1>
+
+    <form class="todo-form">
+      <input 
+        type="text" 
+        id="task"
+        class="todo-input" 
+        placeholder="Add a new task..." 
+      />
+      <button class="add-btn">Add</button>
+    </form>
+
+    <ul class="todo-list">
+      <!-- JS will add <li> here -->
+      <!-- Example structure:
+      <li class="todo-item">
+        <span>Learn DOM</span>
+        <div class="actions">
+          <button class="complete-btn">✔</button>
+          <button class="delete-btn">✖</button>
+        </div>
+      </li>
+      -->
+    </ul>
+  </div>
+
+  <script>
+ let input = document.querySelector("input");
+let btn = document.querySelector("button");
+let ul = document.querySelector("ul");
+
+function getTodos() {
+  return JSON.parse(localStorage.getItem("todos")) || [];
+}
+
+function saveTodos(todos) {
+  localStorage.setItem("todos", JSON.stringify(todos));
+}
+
+function renderTodo(text, completed = false) {
+  let li = document.createElement("li");
+  li.classList.add("todo-item");
+  if (completed) li.classList.add("completed");
+
+  let span = document.createElement("span");
+  span.innerText = text;
+
+  let action = document.createElement("div");
+  action.classList.add("actions");
+
+  let complete_btn = document.createElement("button");
+  complete_btn.classList.add("complete-btn");
+  complete_btn.innerText = "✔";
+
+  let delete_btn = document.createElement("button");
+  delete_btn.classList.add("delete-btn");
+  delete_btn.innerText = "✖";
+
+  action.appendChild(complete_btn);
+  action.appendChild(delete_btn);
+
+  li.appendChild(span);
+  li.appendChild(action);
+  ul.appendChild(li);
+
+  complete_btn.addEventListener("click", () => {
+    li.classList.toggle("completed");
+
+    let todos = getTodos();
+    todos = todos.map(todo =>
+      todo.text === text
+        ? { ...todo, completed: !todo.completed }
+        : todo
+    );
+    saveTodos(todos);
+  });
+
+  delete_btn.addEventListener("click", () => {
+    li.remove();
+
+    let todos = getTodos();
+    todos = todos.filter(todo => todo.text !== text);
+    saveTodos(todos);
+  });
+}
+
+/* Load todos on page refresh */
+window.addEventListener("DOMContentLoaded", () => {
+  let todos = getTodos();
+  todos.forEach(todo => {
+    renderTodo(todo.text, todo.completed);
+  });
+});
+
+/* Add new todo */
+btn.addEventListener("click", (event) => {
+  event.preventDefault();
+  if (input.value === "") return;
+
+  let todos = getTodos();
+  todos.push({ text: input.value, completed: false });
+  saveTodos(todos);
+
+  renderTodo(input.value);
+  input.value = "";
+});
+
+
+
+  </script>
+
+</body>
+</html>
